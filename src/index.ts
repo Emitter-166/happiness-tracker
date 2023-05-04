@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Sequelize } from 'sequelize';
 import { add_entry, create_entry_graph, get_entries } from './services/entryServices';
+import { happiness_tracker } from './services/scoreCollectionServices';
 
 require('dotenv').config({
     path: path.join(__dirname, ".env")
@@ -28,22 +29,20 @@ fs.readdirSync(path_to_models)
 
 
 sequelize.sync({alter: true}).then(async sequelize => {
-    client.login(process.env._TOKEN);    
-    console.log(await get_entries({userId: 'user2'}, 5, 5));
-    // const data = await create_entry_graph(await get_entries({userId: 'user2'}, 5), ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'August']);
-    // fs.writeFileSync('my-chart.png', data);
-    
+    client.login(process.env._TOKEN);        
 })
 
 
 const F = IntentsBitField.Flags;
-const client = new Client({
+export const client = new Client({
     intents: [F.Guilds, F.GuildMessages, F.GuildMembers, F.MessageContent]
 })
 
 
 client.once('ready', async (client) => {
     console.log("ready");
+    await happiness_tracker('990194034964307968');
+
 })
 
 

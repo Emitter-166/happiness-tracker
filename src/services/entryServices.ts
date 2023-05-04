@@ -16,7 +16,7 @@ export const add_entry = async (userId: string, scores: {happiness?: number, con
             },
             defaults: {
                 userId,
-                lastEntryAt: Date.now()
+                lastEntryAt: Date.now() 
             },
             transaction: t
         })
@@ -30,7 +30,7 @@ export const add_entry = async (userId: string, scores: {happiness?: number, con
         let [entry, entry_created] = await entries_model.findOrCreate({
             where: {
                 userId,
-                date: date
+                date: date  
             },
             defaults: {
                 userId,
@@ -138,8 +138,14 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
                 ]
             },
             options: {
-                devicePixelRatio: 2 // set devicePixelRatio to 2 for anti-aliasing
-              }
+                devicePixelRatio: 2,
+                scales: {
+                    y: {
+                        min: 1,
+                        max: 5
+                    }
+                }
+            }
         }))
         
         return img;
