@@ -20,6 +20,9 @@ export const model = (sequelize: Sequelize) => {
         },
         date: {
             type: CHAR(255)
+        }, 
+        time: {
+            type: INTEGER
         }
     }, {timestamps: false})
 }
