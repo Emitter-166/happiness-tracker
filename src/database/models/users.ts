@@ -6,6 +6,15 @@ export const model = (sequelize: Sequelize) => {
             type: CHAR(25),
             allowNull: false
         },
+        age: {
+            type: INTEGER
+        },
+        gender: {
+            type: CHAR(5)
+        },
+        country: {
+            type: CHAR(255)
+        },
         lastEntryAt: {
             type: INTEGER,
             defaultValue: 0

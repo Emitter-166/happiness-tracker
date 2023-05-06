@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 import { sequelize } from "..";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 
@@ -110,7 +110,7 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
                 datasets: [
                     {
                         label: 'Happiness',
-                        data: [...data.map(v => v.happiness) as number[]],
+                        data: [...data.map(v => v.happiness).reverse() as number[]],
                         fill: false,
                         borderColor: ['yellow'],
                         borderWidth: 1,
@@ -119,7 +119,7 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
     
                     {
                         label: 'Healthiness',
-                        data: [...data.map(v => v.healthiness) as number[]],
+                        data: [...data.map(v => v.healthiness).reverse() as number[]],
                         fill: false,
                         borderColor: ['rgb(255, 102, 255)'],
                         borderWidth: 1,
@@ -128,7 +128,7 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
     
                     {
                         label: 'Confidence',
-                        data: [...data.map(v => v.confidence) as number[]],
+                        data: [...data.map(v => v.confidence).reverse() as number[]],
                         fill: false,
                         borderColor: ['rgb(51, 204, 204)'],
                         borderWidth: 1,
@@ -155,3 +155,28 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
         throw new Error(err.message) 
     }
 }
+
+
+export const download_data = async (userId: string): Promise<Buffer> => {
+    try {
+      const query = `
+        SELECT userId, happiness, healthiness, confidence, date, time
+        FROM entries
+        WHERE userId = :userId
+      `;
+      const entries = await sequelize.query(query, {
+        type: QueryTypes.SELECT,
+        replacements: { userId },
+        raw: true
+      });
+  
+      const csv = "userId,happiness,healthiness,confidence,date,time\n" +
+        entries.map((entry: any) => `${entry.userId},${entry.happiness},${entry.healthiness},${entry.confidence},${entry.date},${entry.time}`).join('\n');
+  
+      return Buffer.from(csv);
+    } catch (err: any) {
+      console.log("Err on /services/entryService/download_data()");
+      console.log(err);
+      throw new Error(err.message);
+    }
+};
