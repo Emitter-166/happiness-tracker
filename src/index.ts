@@ -71,13 +71,3 @@ export const errHandler = async (err: any, msg: any) => {
 }
 
 
-
-
-
-
-
-/* 
-issues:
-   1. the get_entry method is showing invalid length for some reason
-   3. the graph should update every once in a while
-*/

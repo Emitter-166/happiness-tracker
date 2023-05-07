@@ -37,10 +37,13 @@ const buttonHandler = async (int: ButtonInteraction) => {
 
             const allowed = await onBoard(int.user.id);
             if(!allowed){
-                int.update('**Sending you a dm... please make sure its open!**')
+                int.reply({
+                    content: '**Sending you a dm... please make sure its open!**',
+                    ephemeral: true
+                })
                 return;
             }
-            
+
             const rating = Number(customId.split('-')[4]);
             await add_entry(int.user.id, {happiness: rating});
 
