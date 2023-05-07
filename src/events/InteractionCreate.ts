@@ -1,6 +1,6 @@
 import { ButtonInteraction, Client, ModalSubmitInteraction } from "discord.js";
 import { errHandler } from "..";
-import { confidence_tracker_message, downlod_data_message, happiness_tracker_message, healthiness_tracker_message, tracker_done_message } from "../services/scoreCollectionServices";
+import { confidence_tracker_message, downlod_data_message, happiness_tracker_message, healthiness_tracker_message, onBoard, onboard_modal, onboard_modal_handler, tracker_done_message } from "../services/scoreCollectionServices";
 import { add_entry } from "../services/entryServices";
 import { d7, m1, m3, m6, see_happiness_message } from "../services/trackerSeeServices";
 
@@ -29,9 +29,18 @@ const buttonHandler = async (int: ButtonInteraction) => {
                 return await downlod_data_message(int); 
             case 'happiness-tracker-see':
                 return await see_happiness_message(int); 
+            case 'happiness-tracker-onboard-button':
+                return await onboard_modal(int);
         }
 
         if(customId.startsWith('happiness-tracker-rate-happiness')){
+
+            const allowed = await onBoard(int.user.id);
+            if(!allowed){
+                int.update('**Sending you a dm... please make sure its open!**')
+                return;
+            }
+            
             const rating = Number(customId.split('-')[4]);
             await add_entry(int.user.id, {happiness: rating});
 
@@ -68,7 +77,10 @@ const buttonHandler = async (int: ButtonInteraction) => {
 
 const modalHandler = async (int: ModalSubmitInteraction) => {
     try{
-       
+       const {customId} = int;
+       switch(customId){
+            case 'happiness-tracker-onboard-modal': return await onboard_modal_handler(int)
+        }
     }catch(err: any){
         console.log("Err at events/interactionCreate.ts/modalHandler()");
         console.log(err);

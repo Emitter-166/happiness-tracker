@@ -12,9 +12,13 @@
   "dependencies": {
     "chart.js": "^3.9.1",
     "chartjs-node-canvas": "^4.1.6",
+    "country-list": "^2.3.0",
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "sequelize": "^6.28.0",
     "sqlite3": "^5.1.4"
+  },
+  "devDependencies": {
+    "@types/country-list": "^2.1.1"
   }
 }

@@ -1,6 +1,7 @@
 import { Op, QueryTypes } from "sequelize";
 import { sequelize } from "..";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
+import { onBoard } from "./scoreCollectionServices";
 
 export const add_entry = async (userId: string, scores: {happiness?: number, confidence?: number, healthiness?: number}) => {
     try{
@@ -10,22 +11,6 @@ export const add_entry = async (userId: string, scores: {happiness?: number, con
 
         const t = await sequelize.transaction({autocommit: false});
 
-        const [user, user_creeated] = await users_model.findOrCreate({
-            where: {
-                userId
-            },
-            defaults: {
-                userId,
-                lastEntryAt: Date.now() 
-            },
-            transaction: t
-        })
-
-        if(!user_creeated){
-            await user.update({
-                lastEntryAt: Date.now()
-            }, {transaction: t})
-        }
 
         let [entry, entry_created] = await entries_model.findOrCreate({
             where: {
@@ -71,19 +56,27 @@ export const get_entries = async (data: {userId?: string}, days: number, data_po
                     [Op.gt]: Date.now() - (days * 86400000)
                 },
                 ...data
-            }
+            },
+            order: [['time', 'ASC']] // add this to order by time ascending
         });
+        console.log(all.length);
+        
+
+        const numZeros = data_points - all.length; // calculate number of zeros needed at beginning
+        const zeros = Array(numZeros).fill({ happiness: 0, confidence: 0, healthiness: 0 }); // create array of zeros
+        const entries = [...zeros, ...all.map(entry => entry.toJSON())]; // copy data values to remaining positions
 
         // Calculate the number of entries per group
-        const groupSize = Math.ceil(all.length / data_points);
-
+        const groupSize = Math.ceil(entries.length / data_points);
+        console.log(groupSize);
+        
         // Divide the array into groups and calculate the averages for each group
         const averages = [];
         for (let i = 0; i < data_points; i++) {
-            const group = all.slice(i * groupSize, (i + 1) * groupSize);
-            const totalHappiness = group.reduce((sum, entry) => sum + entry.dataValues.happiness, 0);
-            const totalConfidence = group.reduce((sum, entry) => sum + entry.dataValues.confidence, 0);
-            const totalHealthiness = group.reduce((sum, entry) => sum + entry.dataValues.healthiness, 0);
+            const group = entries.slice(i * groupSize, (i + 1) * groupSize);
+            const totalHappiness = group.reduce((sum, entry) => sum + entry.happiness, 0);
+            const totalConfidence = group.reduce((sum, entry) => sum + entry.confidence, 0);
+            const totalHealthiness = group.reduce((sum, entry) => sum + entry.healthiness, 0);
             const averageHappiness = group.length > 0 ? totalHappiness / group.length : 0;
             const averageConfidence = group.length > 0 ? totalConfidence / group.length : 0;
             const averageHealthiness = group.length > 0 ? totalHealthiness / group.length : 0;
@@ -99,6 +92,7 @@ export const get_entries = async (data: {userId?: string}, days: number, data_po
 };
 
 
+
 export const create_entry_graph = async (data: any[], labels: string[]) => {
     try{
         const canvas = new ChartJSNodeCanvas({height: 200, width: 372, backgroundColour: 'black'})
@@ -110,7 +104,7 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
                 datasets: [
                     {
                         label: 'Happiness',
-                        data: [...data.map(v => v.happiness).reverse() as number[]],
+                        data: [...data.map(v => v.happiness) as number[]],
                         fill: false,
                         borderColor: ['yellow'],
                         borderWidth: 1,
@@ -119,7 +113,7 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
     
                     {
                         label: 'Healthiness',
-                        data: [...data.map(v => v.healthiness).reverse() as number[]],
+                        data: [...data.map(v => v.healthiness) as number[]],
                         fill: false,
                         borderColor: ['rgb(255, 102, 255)'],
                         borderWidth: 1,
@@ -128,7 +122,7 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
     
                     {
                         label: 'Confidence',
-                        data: [...data.map(v => v.confidence).reverse() as number[]],
+                        data: [...data.map(v => v.confidence) as number[]],
                         fill: false,
                         borderColor: ['rgb(51, 204, 204)'],
                         borderWidth: 1,
@@ -141,7 +135,7 @@ export const create_entry_graph = async (data: any[], labels: string[]) => {
                 devicePixelRatio: 2,
                 scales: {
                     y: {
-                        min: 1,
+                        min: 0,
                         max: 5
                     }
                 }

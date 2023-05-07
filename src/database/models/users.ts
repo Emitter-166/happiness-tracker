@@ -1,4 +1,4 @@
-import { Sequelize, INTEGER, CHAR } from "sequelize";
+import { Sequelize, INTEGER, CHAR, BOOLEAN } from "sequelize";
 
 export const model = (sequelize: Sequelize) => {
     sequelize.define('users', {
@@ -18,6 +18,10 @@ export const model = (sequelize: Sequelize) => {
         lastEntryAt: {
             type: INTEGER,
             defaultValue: 0
+        },
+        reminded: {
+            type: BOOLEAN,
+            defaultValue: false
         }
     }, {timestamps: false})
 }

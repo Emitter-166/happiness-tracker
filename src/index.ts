@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { Sequelize } from 'sequelize';
 import { messageCreate_listener } from './events/messageCreate';
 import { InteractionCreate_listener } from './events/InteractionCreate';
-import { reminder_scanner, send_reminder } from './services/scoreCollectionServices';
+import { isCountryNameCorrect, reminder_scanner, send_reminder } from './services/scoreCollectionServices';
 
 require('dotenv').config({
     path: path.join(__dirname, ".env")
@@ -25,7 +25,6 @@ fs.readdirSync(path_to_models)
         const model = require(path.join(path_to_models, modelFile));
         model.model(sequelize);
     })
-
 
 
 
@@ -76,3 +75,9 @@ export const errHandler = async (err: any, msg: any) => {
 
 
 
+/* 
+issues:
+   1. the get_entry method is showing invalid length for some reason
+   2. the weeks aren't in correct order
+   3. the graph should update every once in a while
+*/
