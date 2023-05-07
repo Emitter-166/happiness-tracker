@@ -82,7 +82,7 @@ export const happiness_tracker = async (channelId?: string, msg?: Message) => {
 export const update_happiness_tracker_msg = () => {
     setInterval(async () => {
         await happiness_tracker('', TRACKER_MSG)
-    }, 10_000)
+    }, 60_000)
 }
 export function getWeeksOfMonth() {
     const now = new Date();
