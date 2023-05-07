@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { Sequelize } from 'sequelize';
 import { messageCreate_listener } from './events/messageCreate';
 import { InteractionCreate_listener } from './events/InteractionCreate';
-import { isCountryNameCorrect, reminder_scanner, send_reminder } from './services/scoreCollectionServices';
+import { getWeeksOfMonth, isCountryNameCorrect, reminder_scanner, send_reminder, update_happiness_tracker_msg } from './services/scoreCollectionServices';
 
 require('dotenv').config({
     path: path.join(__dirname, ".env")
@@ -51,6 +51,7 @@ client.once('ready', async (client) => {
     messageCreate_listener(client);
     InteractionCreate_listener(client);
     reminder_scanner(); 
+    update_happiness_tracker_msg();
 
  })
 
@@ -78,6 +79,5 @@ export const errHandler = async (err: any, msg: any) => {
 /* 
 issues:
    1. the get_entry method is showing invalid length for some reason
-   2. the weeks aren't in correct order
    3. the graph should update every once in a while
 */

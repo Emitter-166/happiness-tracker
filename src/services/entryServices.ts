@@ -59,16 +59,16 @@ export const get_entries = async (data: {userId?: string}, days: number, data_po
             },
             order: [['time', 'ASC']] // add this to order by time ascending
         });
-        console.log(all.length);
-        
 
-        const numZeros = data_points - all.length; // calculate number of zeros needed at beginning
-        const zeros = Array(numZeros).fill({ happiness: 0, confidence: 0, healthiness: 0 }); // create array of zeros
+        const numZeros = Math.max(0, data_points - all.length); // calculate number of zeros needed at beginning
+                
+        const zeros = new Array(numZeros).fill({ happiness: 0, confidence: 0, healthiness: 0 });
+
         const entries = [...zeros, ...all.map(entry => entry.toJSON())]; // copy data values to remaining positions
 
         // Calculate the number of entries per group
         const groupSize = Math.ceil(entries.length / data_points);
-        console.log(groupSize);
+
         
         // Divide the array into groups and calculate the averages for each group
         const averages = [];

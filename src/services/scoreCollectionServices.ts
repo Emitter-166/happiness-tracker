@@ -7,6 +7,7 @@ import {
     EmbedBuilder,
     GuildTextBasedChannel,
     Interaction,
+    Message,
     ModalBuilder,
     ModalSubmitInteraction,
     TextInputBuilder,
@@ -25,18 +26,21 @@ import {
     client,
     sequelize
 } from "..";
+let TRACKER_MSG: Message | undefined = undefined;
 
-export const happiness_tracker = async (channelId: string) => {
+export const happiness_tracker = async (channelId?: string, msg?: Message) => {
     try {
         if (!client.isReady()) return;
-        const channel = (await client.channels.fetch(channelId)) as GuildTextBasedChannel;
+        if(!msg && !channelId) return;
+        
+        let channel;
+        if(channelId)
+            channel = (await client.channels.fetch(channelId)) as GuildTextBasedChannel;
 
         const server_data = await get_entries({}, 30, 4);
-        console.log("yes");
         
-        const server_graph = await create_entry_graph(server_data, ['week 1', 'week 2', 'week 3', 'week 4'])
+        const server_graph = await create_entry_graph(server_data, getWeeksOfMonth())
 
-        console.log("yes");
         
         const attachment = new AttachmentBuilder(server_graph, {
             name: 'stats.png'
@@ -55,11 +59,19 @@ export const happiness_tracker = async (channelId: string) => {
                 .setStyle(ButtonStyle.Secondary)
             )
 
-        await channel.send({
+        if(!msg && channel){
+            TRACKER_MSG = await channel.send({
             files: [attachment],
             content: text,
             components: [rows]
-        })
+        })}else{
+            await msg?.edit({
+                files: [attachment],
+                content: text,
+                components: [rows]
+            })
+        }
+        
     } catch (err: any) {
         console.log("Err on /services/scoreCollectionServices.ts/happiness_tracker()");
         console.log(err);
@@ -67,6 +79,28 @@ export const happiness_tracker = async (channelId: string) => {
     }
 }
 
+export const update_happiness_tracker_msg = () => {
+    setInterval(async () => {
+        await happiness_tracker('', TRACKER_MSG)
+    }, 10_000)
+}
+export function getWeeksOfMonth() {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const currentWeek = Math.ceil((now.getDate() + firstDayOfMonth.getDay()) / 7);
+    const weeks = ['1st week', '2nd week', '3rd week', '4th week'];
+    const result = [];
+    for (let i = currentWeek; i < weeks.length; i++) {
+        result.push(weeks[i]);
+    }
+    for (let i = 0; i < currentWeek; i++) {
+        result.push(weeks[i]);
+    }
+    return result;
+}
+  
+  
+  
 export const onBoard = async (userId: string) => {
     try {
         const users_model = sequelize.model('users');

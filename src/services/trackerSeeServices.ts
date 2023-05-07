@@ -9,6 +9,7 @@ import {
   create_entry_graph,
   get_entries
 } from "./entryServices";
+import { getWeeksOfMonth } from "./scoreCollectionServices";
 
 export const see_happiness_message = async (int: ButtonInteraction) => {
   try {
@@ -96,7 +97,7 @@ export const m1 = async (int: ButtonInteraction) => {
     const data = await get_entries({
       userId: int.user.id
     }, 30, 4)
-    const graph = await create_entry_graph(data, ['week 1', 'week 2', 'week 3', 'week 4']);
+    const graph = await create_entry_graph(data, getWeeksOfMonth());
     const attachment = new AttachmentBuilder(graph);
 
     await int.update({
