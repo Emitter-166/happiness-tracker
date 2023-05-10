@@ -37,10 +37,24 @@ export const see_happiness_message = async (int: ButtonInteraction) => {
         .setLabel('Download your happiness data')
       )
 
+      const days = Array.from({
+        length: 7
+      }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (i + 1));
+        return date.toLocaleString('default', {
+          weekday: 'long'
+        });
+      }).reverse();
+  
+      const today = days.shift();
+      days.push(today as string);
+
     const data = await get_entries({
       userId: int.user.id
-    }, 30, 4)
-    const graph = await create_entry_graph(data, ['week 1', 'week 2', 'week 3', 'week 4']);
+    }, 7, 7);
+    
+    const graph = await create_entry_graph(data, days);
     const attachment = new AttachmentBuilder(graph);
 
     const text = '**we\'ve created a graph for you to help you better understand your wellbeing!** \n'
