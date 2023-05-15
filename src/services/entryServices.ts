@@ -1,7 +1,6 @@
 import { Op, QueryTypes } from "sequelize";
 import { sequelize } from "..";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
-import { onBoard } from "./scoreCollectionServices";
 
 export const add_entry = async (userId: string, scores: {happiness?: number, confidence?: number, healthiness?: number}) => {
     try{
@@ -41,6 +40,28 @@ export const add_entry = async (userId: string, scores: {happiness?: number, con
 
     }catch(err: any){
         console.log("Err on /services/entryService/add_entry()");
+        console.log(err);
+        throw new Error(err.message) 
+    }
+}
+
+export const get_previousDay_entry = async (userId: string) => {
+    try{
+        const entries_model = sequelize.model('entries');
+        const model = await entries_model.findOne({
+            where: {
+                userId
+            }
+        })
+        const {happiness, confidence, healthiness} = model?.dataValues;
+
+        return {
+            happiness,
+            confidence,
+            healthiness
+        }
+    }catch(err: any){
+        console.log("Err on /services/entryService/get_previousDay_entry()");
         console.log(err);
         throw new Error(err.message) 
     }

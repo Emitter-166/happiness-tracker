@@ -14,9 +14,11 @@ import {
     TextInputStyle
 } from "discord.js";
 import {
+    add_entry,
     create_entry_graph,
     download_data,
-    get_entries
+    get_entries,
+    get_previousDay_entry
 } from "./entryServices";
 import {
     getCode,
@@ -432,6 +434,7 @@ export const reminder_scanner = () => {
             } = user.dataValues;
 
             if ((lastEntryAt + 86400000 < Date.now()) && (reminded === false)) {
+                await add_entry(userId, await get_previousDay_entry(userId))
                 await send_reminder(userId);
                 await user.update({
                     reminded: true

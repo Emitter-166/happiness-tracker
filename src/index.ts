@@ -5,6 +5,7 @@ import { Sequelize } from 'sequelize';
 import { messageCreate_listener } from './events/messageCreate';
 import { InteractionCreate_listener } from './events/InteractionCreate';
 import { getWeeksOfMonth, isCountryNameCorrect, reminder_scanner, send_reminder, update_happiness_tracker_msg } from './services/scoreCollectionServices';
+import { get_previousDay_entry } from './services/entryServices';
 
 require('dotenv').config({
     path: path.join(__dirname, ".env")
@@ -46,13 +47,13 @@ export const client = new Client({
 })
 
 
+
 client.once('ready', async (client) => {
     console.log("ready");
     messageCreate_listener(client);
     InteractionCreate_listener(client);
     reminder_scanner(); 
     update_happiness_tracker_msg();
-
  })
 
 export const errHandler = async (err: any, msg: any) => {
